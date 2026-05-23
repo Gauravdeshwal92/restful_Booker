@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  parallel="methods": Runs individual test methods concurrently.
+  thread-count="5": Caps concurrent threads to 5 to avoid overwhelming the server.
+-->
+<suite name="API Automation Test Suite" parallel="methods" thread-count="5" verbose="1">
+
+    <!-- 1. GLOBAL LISTENERS -->
+    <!-- These act as framework hooks to intercept test starts, passes, and failures -->
+    <listeners>
+        <!-- Automatically logs test statuses to your Allure reports -->
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+        <listener class-name="com.framework.listeners.TestListener"/>
+        <!-- Optional: Hook up your own custom extent report or logging listener here if needed -->
+        <!-- <listener class-name="com.framework.listeners.TestListener"/> -->
+
+    </listeners>
+
+    <!-- 2. GLOBAL PARAMETERS -->
+    <!-- You can pull these parameters dynamically into your Java code using @Parameters -->
+    <parameter name="env" value="env" />
+
+    <!-- 3. TEST CATEGORIES / SUITES -->
+    <test name="Booking Management Component Tests">
+        <!-- Optional: Filter by specific TestNG groups -->
+        <groups>
+            <run>
+                <!-- Uncomment these lines if you only want to execute a specific subset -->
+                <!-- <include name="smoke"/> -->
+                <!-- <exclude name="regression"/> -->
+            </run>
+        </groups>
+
+        <classes>
+            <!-- Point this to your actual test execution classes -->
+            <class name="com.framework.tests.BookingTest" />
+            <!-- You can chain multiple classes here as your framework grows -->
+            <!-- <class name="com.framework.tests.AuthTest" /> -->
+        </classes>
+    </test>
+
+</suite>

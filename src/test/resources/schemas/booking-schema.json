@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BookingDetailsSchema",
+  "description": "Schema for the booking details object without the ID wrapper",
+  "type": "object",
+  "required": [
+    "firstname",
+    "lastname",
+    "totalprice",
+    "depositpaid",
+    "bookingdates"
+  ],
+  "properties": {
+    "firstname": {
+      "type": "string",
+      "description": "The guest's first name"
+    },
+    "lastname": {
+      "type": "string",
+      "description": "The guest's last name"
+    },
+    "totalprice": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total cost of the booking"
+    },
+    "depositpaid": {
+      "type": "boolean",
+      "description": "Whether a deposit has been placed"
+    },
+    "bookingdates": {
+      "type": "object",
+      "required": [
+        "checkin",
+        "checkout"
+      ],
+      "properties": {
+        "checkin": {
+          "type": "string",
+          "format": "date",
+          "description": "Check-in date (YYYY-MM-DD)"
+        },
+        "checkout": {
+          "type": "string",
+          "format": "date",
+          "description": "Check-out date (YYYY-MM-DD)"
+        }
+      }
+    },
+    "additionalneeds": {
+      "type": "string",
+      "description": "Any extra requirements like Breakfast or extra bed"
+    }
+  }
+}
