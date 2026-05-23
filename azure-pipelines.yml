@@ -9,14 +9,82 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: Maven@3
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+stages:
+- stage: Build
+  displayName: Build and Test
+  jobs:
+  - job: MavenBuild
+    displayName: Maven Build
+    steps:
+    - task: Maven@3
+      displayName: Run clean test
+      inputs:
+        mavenPomFile: 'pom.xml'
+        mavenOptions: '-Xmx3072m'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '17'
+        jdkArchitectureOption: 'x64'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        goals: 'clean test'
+
+- stage: Package
+  displayName: Package Artifact
+  dependsOn: Build
+  jobs:
+  - job: MavenPackage
+    displayName: Maven Package
+    steps:
+    - task: Maven@3
+      displayName: Create package
+      inputs:
+        mavenPomFile: 'pom.xml'
+        mavenOptions: '-Xmx3072m'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '17'
+        jdkArchitectureOption: 'x64'
+        goals: 'package'
+
+- stage: Report
+  displayName: Generate Allure Report
+  dependsOn: Package
+  jobs:
+  - job: AllureReport
+    displayName: Generate Allure Report
+    steps:
+    - task: Maven@3
+      displayName: Generate Allure report
+      inputs:
+        mavenPomFile: 'pom.xml'
+        mavenOptions: '-Xmx3072m'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '17'
+        jdkArchitectureOption: 'x64'
+        goals: 'io.qameta.allure:allure-maven:3.0.1:report'
+        options: '-Dallure.results.directory=target/allure-results -Dallure.report.directory=target/allure-report'
+
+- stage: Publish
+  displayName: Publish Artifacts
+  dependsOn: Report
+  jobs:
+  - job: PublishArtifacts
+    displayName: Publish Build Artifacts
+    steps:
+    - task: PublishBuildArtifacts@1
+      displayName: Publish packaged JAR
+      inputs:
+        PathtoPublish: 'target'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Allure report
+      inputs:
+        PathtoPublish: 'target/allure-report'
+        ArtifactName: 'allure-report'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Allure results
+      inputs:
+        PathtoPublish: 'target/allure-results'
+        ArtifactName: 'allure-results'
+        publishLocation: 'Container'
